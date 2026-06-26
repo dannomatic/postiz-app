@@ -37,6 +37,7 @@ model Organization {
   signatures          Signatures[]
   subscription        Subscription?
   tags                Tags[]
+  templates           Template[]
   thirdParty          ThirdParty[]
   usedCodes           UsedCodes[]
   users               UserOrganization[]
@@ -59,6 +60,7 @@ model Tags {
   updatedAt    DateTime     @updatedAt
   organization Organization @relation(fields: [orgId], references: [id])
   posts        TagsPosts[]
+  templates    TemplateTags[]
 
   @@index([orgId])
   @@index([deletedAt])
@@ -74,6 +76,40 @@ model TagsPosts {
 
   @@id([postId, tagId])
   @@unique([postId, tagId])
+}
+
+model Template {
+  id           String         @id @default(uuid())
+  orgId        String
+  customerId   String?
+  name         String
+  category     String?
+  postType     String?
+  payload      String
+  deletedAt    DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  organization Organization   @relation(fields: [orgId], references: [id])
+  customer     Customer?      @relation(fields: [customerId], references: [id])
+  tags         TemplateTags[]
+
+  @@index([orgId])
+  @@index([customerId])
+  @@index([category])
+  @@index([postType])
+  @@index([deletedAt])
+}
+
+model TemplateTags {
+  templateId String
+  tagId      String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  template   Template @relation(fields: [templateId], references: [id])
+  tag        Tags     @relation(fields: [tagId], references: [id])
+
+  @@id([templateId, tagId])
+  @@unique([templateId, tagId])
 }
 
 model User {
@@ -307,6 +343,7 @@ model Customer {
   deletedAt    DateTime?
   organization Organization  @relation(fields: [orgId], references: [id])
   integrations Integration[]
+  templates    Template[]
 
   @@unique([orgId, name, deletedAt])
 }
