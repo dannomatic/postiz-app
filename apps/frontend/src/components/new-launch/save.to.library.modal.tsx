@@ -10,22 +10,34 @@ import { useT } from '@gitroom/react/translation/get.transation.service.client';
 // Metadata prompt shown when saving the current composer content to the
 // Content Library. The actual post payload (per-channel content/media/settings)
 // is built by the composer and passed in via `posts`.
+export interface LibraryDefaults {
+  name?: string;
+  category?: string;
+  postType?: string;
+  customerId?: string;
+  tags?: { value: string; label: string }[];
+}
+
 export const SaveToLibraryModal: FC<{
   posts: any[];
   tags: { value: string; label: string }[];
   integrations: any[];
+  defaults?: LibraryDefaults;
   onSaved?: () => void;
-}> = ({ posts, tags, integrations, onSaved }) => {
+}> = ({ posts, tags, integrations, defaults, onSaved }) => {
   const fetch = useFetch();
   const toaster = useToaster();
   const modal = useModals();
   const t = useT();
 
-  const [name, setName] = useState('');
-  const [category, setCategory] = useState('');
-  const [postType, setPostType] = useState('');
-  const [customerId, setCustomerId] = useState('');
+  const [name, setName] = useState(defaults?.name || '');
+  const [category, setCategory] = useState(defaults?.category || '');
+  const [postType, setPostType] = useState(defaults?.postType || '');
+  const [customerId, setCustomerId] = useState(defaults?.customerId || '');
   const [loading, setLoading] = useState(false);
+
+  const effectiveTags =
+    defaults?.tags && defaults.tags.length ? defaults.tags : tags;
 
   const customers = useMemo(() => {
     const map = new Map<string, string>();
@@ -57,7 +69,7 @@ export const SaveToLibraryModal: FC<{
         category: category.trim() || undefined,
         postType: postType.trim() || undefined,
         customerId: customerId || undefined,
-        tags,
+        tags: effectiveTags,
         payload: { posts },
       }),
     });

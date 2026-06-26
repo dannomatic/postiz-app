@@ -56,7 +56,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
   const [showSettings, setShowSettings] = useState(false);
   const { data: shortlinkPreferenceData } = useShortlinkPreference();
 
-  const { addEditSets, mutate, customClose, dummy } = props;
+  const { addEditSets, mutate, customClose, dummy, libraryDefaults } = props;
 
   const {
     selectedIntegrations,
@@ -473,10 +473,11 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
           posts={posts}
           tags={tags}
           integrations={integrations}
+          defaults={libraryDefaults}
         />
       ),
     });
-  }, [ref, tags, integrations, modal]);
+  }, [ref, tags, integrations, modal, libraryDefaults]);
 
   return (
     <div className="w-full h-full flex-1 p-[40px] flex relative">

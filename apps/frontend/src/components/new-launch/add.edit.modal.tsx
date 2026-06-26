@@ -31,6 +31,15 @@ export interface AddEditModalProps {
       path: string;
     }>;
   }>;
+  // Pre-fills the "Save to Library" metadata when launched from the guided
+  // New Library Item flow (client/category/tags chosen up front).
+  libraryDefaults?: {
+    name?: string;
+    category?: string;
+    postType?: string;
+    customerId?: string;
+    tags?: { value: string; label: string }[];
+  };
 }
 
 export const AddEditModal: FC<AddEditModalProps> = (props) => {

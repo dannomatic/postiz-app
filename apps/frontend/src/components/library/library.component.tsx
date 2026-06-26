@@ -11,6 +11,12 @@ import { useT } from '@gitroom/react/translation/get.transation.service.client';
 import { AddEditModal } from '@gitroom/frontend/components/new-launch/add.edit.modal';
 import { newDayjs } from '@gitroom/frontend/components/layout/set.timezone';
 import { useModals } from '@gitroom/frontend/components/layout/new-modal';
+import { useUser } from '@gitroom/frontend/components/layout/user.context';
+import { ManageClientsModal } from '@gitroom/frontend/components/library/manage.clients.modal';
+import {
+  NewLibraryItemModal,
+  NewLibraryLaunch,
+} from '@gitroom/frontend/components/library/new.library.item.modal';
 
 const distinct = (arr: string[]) =>
   Array.from(new Set(arr.filter(Boolean))).sort();
@@ -20,6 +26,10 @@ export const LibraryComponent: FC = () => {
   const modal = useModals();
   const toaster = useToaster();
   const t = useT();
+  const user = useUser();
+  const isAdmin =
+    !!(user as any)?.isSuperAdmin ||
+    ['ADMIN', 'SUPERADMIN'].includes((user as any)?.role);
 
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
@@ -177,20 +187,90 @@ export const LibraryComponent: FC = () => {
     [mutate]
   );
 
+  const launchFromWizard = useCallback(
+    (p: NewLibraryLaunch) => {
+      modal.closeAll();
+      modal.openModal({
+        id: 'add-edit-modal',
+        closeOnClickOutside: false,
+        removeLayout: true,
+        closeOnEscape: false,
+        withCloseButton: false,
+        askClose: true,
+        fullScreen: true,
+        classNames: { modal: 'w-[100%] max-w-[1400px] text-textColor' },
+        children: (
+          <AddEditModal
+            allIntegrations={integrations.map((x: any) => ({ ...x }))}
+            integrations={integrations.map((x: any) => ({ ...x }))}
+            selectedChannels={p.channelIds}
+            date={newDayjs()}
+            mutate={mutate}
+            reopenModal={() => {}}
+            libraryDefaults={{
+              name: p.name,
+              category: p.category,
+              postType: p.postType,
+              customerId: p.customerId,
+              tags: p.tags,
+            }}
+          />
+        ),
+        title: ``,
+      });
+    },
+    [integrations, modal, mutate]
+  );
+
+  const openNewLibraryItem = useCallback(() => {
+    modal.openModal({
+      title: ``,
+      withCloseButton: true,
+      closeOnEscape: true,
+      closeOnClickOutside: true,
+      children: <NewLibraryItemModal onLaunch={launchFromWizard} />,
+    });
+  }, [launchFromWizard]);
+
+  const openManageClients = useCallback(() => {
+    modal.openModal({
+      title: ``,
+      withCloseButton: true,
+      closeOnEscape: true,
+      closeOnClickOutside: true,
+      children: <ManageClientsModal />,
+    });
+  }, [modal]);
+
   const selectClass =
     'bg-newBgColor border border-newBorder rounded-[8px] h-[40px] px-[10px] text-[14px] text-textColor outline-none';
 
   return (
     <div className="flex flex-col gap-[20px]">
-      <div>
-        <h3 className="text-[20px] font-[600]">
-          {t('content_library', 'Content Library')} ({filtered.length})
-        </h3>
-        <div className="text-textColor opacity-70 mt-[4px]">
-          {t(
-            'content_library_subtitle',
-            'Reusable, ready-made posts. Pick one and add it to the schedule as a draft.'
+      <div className="flex items-start gap-[12px]">
+        <div className="flex-1">
+          <h3 className="text-[20px] font-[600]">
+            {t('content_library', 'Content Library')} ({filtered.length})
+          </h3>
+          <div className="text-textColor opacity-70 mt-[4px]">
+            {t(
+              'content_library_subtitle',
+              'Reusable, ready-made posts. Pick one and add it to the schedule as a draft.'
+            )}
+          </div>
+        </div>
+        <div className="flex gap-[8px]">
+          {isAdmin && (
+            <button
+              onClick={openManageClients}
+              className="px-[16px] h-[44px] rounded-[8px] border border-newBorder text-[14px] font-[600]"
+            >
+              {t('manage_clients', 'Manage Clients')}
+            </button>
           )}
+          <Button onClick={openNewLibraryItem}>
+            {t('new_library_item', 'New Library Item')}
+          </Button>
         </div>
       </div>
 
