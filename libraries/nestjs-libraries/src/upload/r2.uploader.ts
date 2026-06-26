@@ -46,6 +46,11 @@ const {
 const R2 = new S3Client({
   region: 'auto',
   endpoint: `https://${CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  // AWS SDK v3 adds CRC32 integrity checksums by default, which Cloudflare R2
+  // does not handle on presigned multipart part uploads (videos) — it surfaces
+  // as ERR_CONNECTION_RESET / SSL bad-record. Only add checksums when required.
+  requestChecksumCalculation: 'WHEN_REQUIRED',
+  responseChecksumValidation: 'WHEN_REQUIRED',
   credentials: {
     accessKeyId: CLOUDFLARE_ACCESS_KEY!,
     secretAccessKey: CLOUDFLARE_SECRET_ACCESS_KEY!,
