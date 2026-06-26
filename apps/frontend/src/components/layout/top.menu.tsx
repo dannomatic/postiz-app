@@ -115,6 +115,27 @@ export const useMenuItem = () => {
       path: '/media',
     },
     {
+      name: t('library', 'Library'),
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="21"
+          viewBox="0 0 20 21"
+          fill="none"
+        >
+          <path
+            d="M3.5 2.5H6.5C6.96 2.5 7.34 2.88 7.34 3.34V17.66C7.34 18.12 6.96 18.5 6.5 18.5H3.5C3.04 18.5 2.66 18.12 2.66 17.66V3.34C2.66 2.88 3.04 2.5 3.5 2.5ZM9.84 2.5H12.84C13.3 2.5 13.68 2.88 13.68 3.34V17.66C13.68 18.12 13.3 18.5 12.84 18.5H9.84C9.38 18.5 9 18.12 9 17.66V3.34C9 2.88 9.38 2.5 9.84 2.5ZM16.04 3.06L17.9 3.6C18.34 3.73 18.6 4.19 18.47 4.63L14.9 17.06C14.77 17.5 14.31 17.76 13.87 17.63"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ),
+      path: '/library',
+    },
+    {
       name: t('plugs', 'Plugs'),
       icon: (
         <svg

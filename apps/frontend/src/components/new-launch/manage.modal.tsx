@@ -29,6 +29,7 @@ import { makeId } from '@gitroom/nestjs-libraries/services/make.is';
 import { useModals } from '@gitroom/frontend/components/layout/new-modal';
 import { capitalize } from 'lodash';
 import { SelectCustomer } from '@gitroom/frontend/components/launches/select.customer';
+import { SaveToLibraryModal } from '@gitroom/frontend/components/new-launch/save.to.library.modal';
 import { CopilotPopup } from '@copilotkit/react-ui';
 import { DummyCodeComponent } from '@gitroom/frontend/components/new-launch/dummy.code.component';
 import { CreationMethodBadge } from '@gitroom/frontend/components/launches/creation.method.badge';
@@ -436,6 +437,47 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
     [ref, repeater, tags, date, addEditSets, dummy, shortlinkPreferenceData]
   );
 
+  const saveToLibrary = useCallback(async () => {
+    const allValues = await ref.current.getAllValues();
+    const group = makeId(10);
+
+    // Same payload shape the composer sends to /posts, stored verbatim so a
+    // template can be re-hydrated straight back into this composer later.
+    const posts = allValues.map((post: any) => ({
+      integration: { id: post.id },
+      group,
+      settings: { ...(post.settings || {}) },
+      value: post.values.map((value: any) => ({
+        content: value.content,
+        delay: value.delay || 0,
+        image:
+          (value?.media || []).map(
+            ({ id, path, alt, thumbnail, thumbnailTimestamp }: any) => ({
+              id,
+              path,
+              alt,
+              thumbnail,
+              thumbnailTimestamp,
+            })
+          ) || [],
+      })),
+    }));
+
+    modal.openModal({
+      title: '',
+      withCloseButton: false,
+      closeOnEscape: true,
+      closeOnClickOutside: true,
+      children: (
+        <SaveToLibraryModal
+          posts={posts}
+          tags={tags}
+          integrations={integrations}
+        />
+      ),
+    });
+  }, [ref, tags, integrations, modal]);
+
   return (
     <div className="w-full h-full flex-1 p-[40px] flex relative">
       <div className="flex flex-1 bg-newBgColorInner rounded-[20px] flex-col">
@@ -577,6 +619,18 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
               </button>
             )}
             <DatePicker onChange={setDate} date={date} />
+            {!addEditSets && !dummy && (
+              <button
+                type="button"
+                disabled={
+                  selectedIntegrations.length === 0 || loading || locked
+                }
+                onClick={saveToLibrary}
+                className="relative cursor-pointer disabled:cursor-not-allowed px-[20px] h-[44px] bg-btnSimple justify-center items-center flex rounded-[8px] text-[15px] font-[600]"
+              >
+                {t('save_to_library', 'Save to Library')}
+              </button>
+            )}
             {!addEditSets && (
               <button
                 disabled={
