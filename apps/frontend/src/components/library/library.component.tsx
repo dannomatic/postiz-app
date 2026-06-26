@@ -117,6 +117,23 @@ export const LibraryComponent: FC = () => {
     return first.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
   };
 
+  const fmt = (d?: string) => (d ? new Date(d).toLocaleString() : '');
+
+  const buildSet = (template: any) => ({
+    posts: (template.payload?.posts || [])
+      .filter((p: any) =>
+        integrations.find((i: any) => i.id === p.integration?.id)
+      )
+      .map((p: any) => ({
+        integration: p.integration,
+        settings: p.settings || {},
+        value: (p.value || []).map((v: any) => ({
+          content: v.content,
+          media: v.image || [],
+        })),
+      })),
+  });
+
   const addToSchedule = useCallback(
     (template: any) => () => {
       const set = {
@@ -170,6 +187,56 @@ export const LibraryComponent: FC = () => {
       });
     },
     [integrations, modal, toaster, t]
+  );
+
+  const editTemplate = useCallback(
+    (template: any) => () => {
+      const set = buildSet(template);
+      if (!set.posts.length) {
+        toaster.show(
+          t(
+            'template_no_matching_channels',
+            'None of this template’s channels are connected anymore.'
+          ),
+          'warning'
+        );
+        return;
+      }
+
+      modal.openModal({
+        id: 'add-edit-modal',
+        closeOnClickOutside: false,
+        removeLayout: true,
+        closeOnEscape: false,
+        withCloseButton: false,
+        askClose: true,
+        fullScreen: true,
+        classNames: { modal: 'w-[100%] max-w-[1400px] text-textColor' },
+        children: (
+          <AddEditModal
+            allIntegrations={integrations.map((p: any) => ({ ...p }))}
+            integrations={integrations.map((p: any) => ({ ...p }))}
+            set={set}
+            date={newDayjs()}
+            mutate={mutate}
+            reopenModal={() => {}}
+            libraryDefaults={{
+              id: template.id,
+              name: template.name,
+              pillarId: template.pillarId,
+              postType: template.postType,
+              customerId: template.customerId,
+              tags: (template.tags || []).map((tt: any) => ({
+                value: tt?.tag?.id,
+                label: tt?.tag?.name,
+              })),
+            }}
+          />
+        ),
+        title: ``,
+      });
+    },
+    [integrations, modal, toaster, t, mutate]
   );
 
   const remove = useCallback(
@@ -389,10 +456,32 @@ export const LibraryComponent: FC = () => {
                   t('no_preview', 'No text preview')}
               </div>
 
-              <div className="flex gap-[8px] mt-auto">
+              <div className="text-[11px] opacity-60 leading-[1.5] mt-auto">
+                <div>
+                  {t('created', 'Created')} {fmt(template.createdAt)}
+                </div>
+                <div>
+                  {t('last_updated', 'Last Updated')} {fmt(template.updatedAt)}
+                  {template.updatedBy && (
+                    <>
+                      {' '}
+                      {t('by', 'by')}{' '}
+                      {template.updatedBy.name || template.updatedBy.email}
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-[8px]">
                 <Button onClick={addToSchedule(template)} className="flex-1">
                   {t('add_to_schedule', 'Add to Schedule')}
                 </Button>
+                <button
+                  onClick={editTemplate(template)}
+                  className="px-[12px] h-[44px] rounded-[8px] border border-newBorder text-[14px] font-[600]"
+                >
+                  {t('edit', 'Edit')}
+                </button>
                 <button
                   onClick={remove(template)}
                   className="px-[12px] h-[44px] rounded-[8px] border border-newBorder text-[#FF3F3F] text-[14px] font-[600]"

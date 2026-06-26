@@ -28,8 +28,8 @@ export class TemplatesService {
     return { ...template, payload: this.parsePayload(template.payload) };
   }
 
-  createOrUpdate(orgId: string, body: TemplateDto) {
-    return this._templatesRepository.createOrUpdate(orgId, body);
+  createOrUpdate(orgId: string, body: TemplateDto, userId?: string) {
+    return this._templatesRepository.createOrUpdate(orgId, body, userId);
   }
 
   deleteTemplate(orgId: string, id: string) {

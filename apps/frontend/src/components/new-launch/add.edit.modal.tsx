@@ -34,6 +34,7 @@ export interface AddEditModalProps {
   // Pre-fills the "Save to Library" metadata when launched from the guided
   // New Library Item flow (client/category/tags chosen up front).
   libraryDefaults?: {
+    id?: string;
     name?: string;
     pillarId?: string;
     postType?: string;

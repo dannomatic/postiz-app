@@ -33,6 +33,7 @@ export class TemplatesRepository {
       include: {
         customer: true,
         pillar: { select: { id: true, name: true } },
+        updatedBy: { select: { id: true, name: true, email: true } },
         tags: { include: { tag: true } },
       },
       orderBy: {
@@ -51,6 +52,7 @@ export class TemplatesRepository {
       include: {
         customer: true,
         pillar: { select: { id: true, name: true } },
+        updatedBy: { select: { id: true, name: true, email: true } },
         tags: { include: { tag: true } },
       },
     });
@@ -68,7 +70,7 @@ export class TemplatesRepository {
     });
   }
 
-  async createOrUpdate(orgId: string, body: TemplateDto) {
+  async createOrUpdate(orgId: string, body: TemplateDto, userId?: string) {
     const id = body.id || uuidv4();
     const payload =
       typeof body.payload === 'string'
@@ -88,6 +90,7 @@ export class TemplatesRepository {
         postType: body.postType || null,
         customerId: body.customerId || null,
         pillarId: body.pillarId || null,
+        updatedById: userId || null,
         payload,
       },
       update: {
@@ -96,6 +99,7 @@ export class TemplatesRepository {
         postType: body.postType || null,
         customerId: body.customerId || null,
         pillarId: body.pillarId || null,
+        updatedById: userId || null,
         payload,
       },
     });

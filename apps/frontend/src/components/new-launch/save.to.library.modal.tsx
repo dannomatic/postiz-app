@@ -12,6 +12,7 @@ import { useT } from '@gitroom/react/translation/get.transation.service.client';
 // Content Library. The actual post payload (per-channel content/media/settings)
 // is built by the composer and passed in via `posts`.
 export interface LibraryDefaults {
+  id?: string;
   name?: string;
   pillarId?: string;
   postType?: string;
@@ -80,6 +81,7 @@ export const SaveToLibraryModal: FC<{
     await fetch('/templates', {
       method: 'POST',
       body: JSON.stringify({
+        ...(defaults?.id ? { id: defaults.id } : {}),
         name: name.trim(),
         pillarId: pillarId || undefined,
         postType: postType.trim() || undefined,
