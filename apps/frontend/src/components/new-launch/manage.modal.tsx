@@ -25,6 +25,7 @@ import { TagsComponent } from '@gitroom/frontend/components/launches/tags.compon
 import { useToaster } from '@gitroom/react/toaster/toaster';
 import { deleteDialog } from '@gitroom/react/helpers/delete.dialog';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
+import useSWR from 'swr';
 import { makeId } from '@gitroom/nestjs-libraries/services/make.is';
 import { useModals } from '@gitroom/frontend/components/layout/new-modal';
 import { capitalize } from 'lodash';
@@ -57,6 +58,28 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
   const { data: shortlinkPreferenceData } = useShortlinkPreference();
 
   const { addEditSets, mutate, customClose, dummy, libraryDefaults } = props;
+
+  // Library client/pillar, editable directly on the composer when this is a
+  // library item (lets the user re-home content to another client + pillar).
+  const [libClientId, setLibClientId] = useState(
+    libraryDefaults?.customerId || ''
+  );
+  const [libPillarId, setLibPillarId] = useState(
+    libraryDefaults?.pillarId || ''
+  );
+  const loadLibClients = useCallback(
+    async () => (await fetch('/customers')).json(),
+    []
+  );
+  const { data: libClients = [] } = useSWR('customers', loadLibClients, {
+    revalidateOnFocus: false,
+    revalidateOnMount: true,
+    fallbackData: [],
+  });
+  const libSelectedClient = (libClients as any[]).find(
+    (c: any) => c.id === libClientId
+  );
+  const libPillars = libSelectedClient?.pillars || [];
 
   const {
     selectedIntegrations,
@@ -473,11 +496,23 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
           posts={posts}
           tags={tags}
           integrations={integrations}
-          defaults={libraryDefaults}
+          defaults={{
+            ...(libraryDefaults || {}),
+            customerId: libClientId,
+            pillarId: libPillarId,
+          }}
         />
       ),
     });
-  }, [ref, tags, integrations, modal, libraryDefaults]);
+  }, [
+    ref,
+    tags,
+    integrations,
+    modal,
+    libraryDefaults,
+    libClientId,
+    libPillarId,
+  ]);
 
   return (
     <div className="w-full h-full flex-1 p-[40px] flex relative">
@@ -605,6 +640,41 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
 
             {!dummy && (
               <RepeatComponent repeat={repeater} onChange={setRepeater} />
+            )}
+
+            {!dummy && libraryDefaults && (
+              <>
+                <select
+                  value={libClientId}
+                  onChange={(e) => {
+                    setLibClientId(e.target.value);
+                    setLibPillarId('');
+                  }}
+                  title={t('library_client', 'Library client')}
+                  className="bg-newBgColor border border-newBorder rounded-[8px] h-[40px] px-[10px] text-[13px] text-textColor outline-none max-w-[170px]"
+                >
+                  <option value="">{t('client', 'Client')}</option>
+                  {(libClients as any[]).map((c: any) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={libPillarId}
+                  onChange={(e) => setLibPillarId(e.target.value)}
+                  disabled={!libClientId}
+                  title={t('pillar', 'Pillar')}
+                  className="bg-newBgColor border border-newBorder rounded-[8px] h-[40px] px-[10px] text-[13px] text-textColor outline-none max-w-[170px]"
+                >
+                  <option value="">{t('pillar', 'Pillar')}</option>
+                  {libPillars.map((p: any) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </>
             )}
           </div>
           <div className="pe-[20px] flex items-center justify-end gap-[8px]">
