@@ -77,13 +77,22 @@ export const LibraryComponent: FC = () => {
     () => distinct(templates.map((p: any) => p.postType)),
     [templates]
   );
-  const customers = useMemo(() => {
-    const map = new Map<string, string>();
-    templates.forEach((p: any) => {
-      if (p.customer?.id) map.set(p.customer.id, p.customer.name || p.customer.id);
-    });
-    return Array.from(map, ([id, label]) => ({ id, label }));
-  }, [templates]);
+  const loadCustomers = useCallback(
+    async () => (await fetch('/customers')).json(),
+    []
+  );
+  // Shared 'customers' SWR key so adding a client (Manage Clients) refreshes
+  // this filter live, and clients with no items yet still appear.
+  const { data: allCustomers = [] } = useSWR('customers', loadCustomers, {
+    revalidateOnFocus: false,
+    revalidateIfStale: false,
+    revalidateOnMount: true,
+    fallbackData: [],
+  });
+  const customers = useMemo(
+    () => allCustomers.map((c: any) => ({ id: c.id, label: c.name })),
+    [allCustomers]
+  );
   const allTags = useMemo(
     () =>
       distinct(

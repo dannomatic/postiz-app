@@ -91,7 +91,12 @@ export class GhlService {
     return this._ghlRepository.remove(orgId, customerId);
   }
 
-  async scheduleTemplate(orgId: string, templateId: string, date: string) {
+  async scheduleTemplate(
+    orgId: string,
+    templateId: string,
+    date?: string,
+    draft = false
+  ) {
     const template = await this._templatesService.getTemplate(orgId, templateId);
     if (!template) {
       throw new HttpException('Template not found', 404);
@@ -142,7 +147,13 @@ export class GhlService {
       .filter(Boolean) as string[];
     const integMap = await this._ghlRepository.getIntegrationsMap(orgId, ids);
 
-    const scheduleDate = new Date(date).toISOString();
+    if (!draft && !date) {
+      throw new HttpException(
+        'A date and time is required unless sending as a draft.',
+        400
+      );
+    }
+    const scheduleDate = draft ? undefined : new Date(date!).toISOString();
     const scheduled: string[] = [];
     const skipped: string[] = [];
 
@@ -173,6 +184,7 @@ export class GhlService {
           media,
           scheduleDate,
           userId: conn.userId,
+          draft,
         });
         scheduled.push(label);
       } catch (e: any) {

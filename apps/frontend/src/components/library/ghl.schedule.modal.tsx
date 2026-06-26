@@ -16,6 +16,7 @@ export const GhlScheduleModal: FC<{ template: any }> = ({ template }) => {
   const t = useT();
 
   const [date, setDate] = useState('');
+  const [draft, setDraft] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
 
@@ -23,7 +24,7 @@ export const GhlScheduleModal: FC<{ template: any }> = ({ template }) => {
     'bg-newBgColor border border-newBorder rounded-[8px] h-[44px] px-[12px] text-[14px] text-textColor outline-none';
 
   const submit = useCallback(async () => {
-    if (!date) {
+    if (!draft && !date) {
       toaster.show(
         t('ghl_pick_date', 'Please choose a date and time'),
         'warning'
@@ -34,7 +35,9 @@ export const GhlScheduleModal: FC<{ template: any }> = ({ template }) => {
     try {
       const res = await fetch(`/ghl/schedule/${template.id}`, {
         method: 'POST',
-        body: JSON.stringify({ date: new Date(date).toISOString() }),
+        body: JSON.stringify(
+          draft ? { draft: true } : { date: new Date(date).toISOString() }
+        ),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -65,21 +68,34 @@ export const GhlScheduleModal: FC<{ template: any }> = ({ template }) => {
 
       {!result ? (
         <>
+          <label className="flex items-center gap-[8px] text-[14px] cursor-pointer">
+            <input
+              type="checkbox"
+              checked={draft}
+              onChange={(e) => setDraft(e.target.checked)}
+            />
+            {t('send_as_draft', 'Send as Draft (no schedule)')}
+          </label>
           <div className="flex flex-col gap-[6px]">
-            <label className="text-[14px] font-[500]">
+            <label
+              className={`text-[14px] font-[500] ${draft ? 'opacity-40' : ''}`}
+            >
               {t('schedule_datetime', 'Schedule date & time')}
             </label>
             <input
               type="datetime-local"
-              className={inputClass}
+              className={`${inputClass} ${draft ? 'opacity-40' : ''}`}
               value={date}
+              disabled={draft}
               onChange={(e) => setDate(e.target.value)}
             />
           </div>
           <div className="flex justify-end">
             <Button onClick={submit} disabled={loading}>
               {loading
-                ? t('scheduling', 'Scheduling...')
+                ? t('sending', 'Sending...')
+                : draft
+                ? t('send_draft_to_ghl', 'Send draft to GHL')
                 : t('schedule_to_ghl', 'Schedule to GHL')}
             </Button>
           </div>

@@ -74,8 +74,9 @@ export interface GhlCreatePostInput {
   accountIds: string[];
   summary: string;
   media?: { url: string; type?: string }[];
-  scheduleDate: string; // ISO 8601
+  scheduleDate?: string; // ISO 8601 — required unless draft
   userId: string; // required by GHL — the authoring user
+  draft?: boolean; // send as a GHL draft instead of scheduling
 }
 
 // POST /social-media-posting/:locationId/posts
@@ -88,10 +89,12 @@ export async function ghlCreatePost(
     accountIds: input.accountIds,
     summary: input.summary,
     type: 'post', // GHL enum: post | story | reel
-    status: 'scheduled', // GHL enum: draft | scheduled | published | ...
-    scheduleDate: input.scheduleDate,
+    status: input.draft ? 'draft' : 'scheduled',
     userId: input.userId,
   };
+  if (!input.draft && input.scheduleDate) {
+    body.scheduleDate = input.scheduleDate;
+  }
   if (input.media?.length) {
     body.media = input.media;
   }

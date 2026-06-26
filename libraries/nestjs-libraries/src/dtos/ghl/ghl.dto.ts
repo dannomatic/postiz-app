@@ -1,4 +1,4 @@
-import { IsDefined, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsDefined, IsOptional, IsString } from 'class-validator';
 
 export class GhlConnectionDto {
   @IsString()
@@ -18,8 +18,14 @@ export class GhlConnectionDto {
 }
 
 export class GhlScheduleDto {
-  // ISO 8601 date/time to schedule the post on the GHL calendar
+  // ISO 8601 date/time to schedule the post on the GHL calendar.
+  // Optional when sending as a draft.
+  @IsOptional()
   @IsString()
-  @IsDefined()
-  date: string;
+  date?: string;
+
+  // Send as a GHL draft (no schedule date) instead of scheduling.
+  @IsOptional()
+  @IsBoolean()
+  draft?: boolean;
 }

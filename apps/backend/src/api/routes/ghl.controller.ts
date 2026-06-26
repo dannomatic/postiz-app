@@ -76,6 +76,11 @@ export class GhlController {
     @Param('templateId') templateId: string,
     @Body() body: GhlScheduleDto
   ) {
-    return this._ghlService.scheduleTemplate(org.id, templateId, body.date);
+    return this._ghlService.scheduleTemplate(
+      org.id,
+      templateId,
+      body.date,
+      body.draft
+    );
   }
 }
