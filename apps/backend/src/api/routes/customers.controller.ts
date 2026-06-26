@@ -26,8 +26,10 @@ export class CustomersController {
 
   // Client management (create/rename/delete/assign) is admin-only. Listing is
   // open so any user can pick a client when creating library items.
-  private assertAdmin(user: User) {
-    const role = (user as any)?.role;
+  // The org role lives on req.org.users[0].role (per UserOrganization), not on
+  // the user object; the global isSuperAdmin flag also grants access.
+  private assertAdmin(org: Organization, user: User) {
+    const role = (org as any)?.users?.[0]?.role;
     if (
       !(user as any)?.isSuperAdmin &&
       role !== 'ADMIN' &&
@@ -48,7 +50,7 @@ export class CustomersController {
     @GetUserFromRequest() user: User,
     @Body() body: CustomerDto
   ) {
-    this.assertAdmin(user);
+    this.assertAdmin(org, user);
     return this._customersService.create(org.id, body.name);
   }
 
@@ -58,7 +60,7 @@ export class CustomersController {
     @GetUserFromRequest() user: User,
     @Body() body: UpdateCustomerDto
   ) {
-    this.assertAdmin(user);
+    this.assertAdmin(org, user);
     return this._customersService.rename(org.id, body.id, body.name);
   }
 
@@ -69,7 +71,7 @@ export class CustomersController {
     @Param('id') id: string,
     @Body() body: AssignChannelsDto
   ) {
-    this.assertAdmin(user);
+    this.assertAdmin(org, user);
     return this._customersService.assignChannels(
       org.id,
       id,
@@ -83,7 +85,7 @@ export class CustomersController {
     @GetUserFromRequest() user: User,
     @Param('id') id: string
   ) {
-    this.assertAdmin(user);
+    this.assertAdmin(org, user);
     return this._customersService.remove(org.id, id);
   }
 }
