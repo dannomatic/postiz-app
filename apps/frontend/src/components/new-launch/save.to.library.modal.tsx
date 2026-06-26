@@ -1,6 +1,7 @@
 'use client';
 
 import { FC, useCallback, useMemo, useState } from 'react';
+import { mutate as globalMutate } from 'swr';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import { useToaster } from '@gitroom/react/toaster/toaster';
 import { useModals } from '@gitroom/frontend/components/layout/new-modal';
@@ -74,6 +75,10 @@ export const SaveToLibraryModal: FC<{
       }),
     });
     setLoading(false);
+
+    // Refresh the library list anywhere it's mounted (the composer lives in a
+    // different component tree than the /library page).
+    globalMutate('templates');
 
     toaster.show(t('saved_to_library', 'Saved to library'));
     onSaved?.();

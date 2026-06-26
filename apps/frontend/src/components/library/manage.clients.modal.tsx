@@ -138,7 +138,12 @@ export const ManageClientsModal: FC = () => {
   const { data: integrations = [] } = useSWR(
     '/integrations/list',
     loadIntegrations,
-    { revalidateOnFocus: false, revalidateIfStale: false, fallbackData: [] }
+    {
+      revalidateOnFocus: false,
+      revalidateIfStale: false,
+      revalidateOnMount: true,
+      fallbackData: [],
+    }
   );
 
   const addClient = useCallback(async () => {

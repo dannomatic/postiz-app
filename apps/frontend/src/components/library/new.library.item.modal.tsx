@@ -40,6 +40,7 @@ export const NewLibraryItemModal: FC<{
   const { data: clients = [] } = useSWR('customers', loadClients, {
     revalidateOnFocus: false,
     revalidateIfStale: false,
+    revalidateOnMount: true,
     fallbackData: [],
   });
 
@@ -50,6 +51,7 @@ export const NewLibraryItemModal: FC<{
   const { data: tags = [] } = useSWR('/posts/tags', loadTags, {
     revalidateOnFocus: false,
     revalidateIfStale: false,
+    revalidateOnMount: true,
     fallbackData: [],
   });
 
