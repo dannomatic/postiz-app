@@ -13,6 +13,8 @@ import { PostsService } from '@gitroom/nestjs-libraries/database/prisma/posts/po
 import { PostsRepository } from '@gitroom/nestjs-libraries/database/prisma/posts/posts.repository';
 import { TemplatesService } from '@gitroom/nestjs-libraries/database/prisma/templates/templates.service';
 import { TemplatesRepository } from '@gitroom/nestjs-libraries/database/prisma/templates/templates.repository';
+import { GhlService } from '@gitroom/nestjs-libraries/database/prisma/ghl/ghl.service';
+import { GhlRepository } from '@gitroom/nestjs-libraries/database/prisma/ghl/ghl.repository';
 import { CustomersService } from '@gitroom/nestjs-libraries/database/prisma/customers/customers.service';
 import { CustomersRepository } from '@gitroom/nestjs-libraries/database/prisma/customers/customers.repository';
 import { IntegrationManager } from '@gitroom/nestjs-libraries/integrations/integration.manager';
@@ -73,6 +75,8 @@ import { AdminStatsService } from '@gitroom/nestjs-libraries/database/prisma/adm
     PostsRepository,
     TemplatesService,
     TemplatesRepository,
+    GhlService,
+    GhlRepository,
     CustomersService,
     CustomersRepository,
     StripeService,

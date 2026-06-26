@@ -39,6 +39,7 @@ model Organization {
   tags                Tags[]
   templates           Template[]
   pillars             Pillar[]
+  ghlConnections      GhlConnection[]
   thirdParty          ThirdParty[]
   usedCodes           UsedCodes[]
   users               UserOrganization[]
@@ -366,12 +367,30 @@ model Customer {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   deletedAt    DateTime?
-  organization Organization  @relation(fields: [orgId], references: [id])
-  integrations Integration[]
-  templates    Template[]
-  pillars      Pillar[]
+  organization  Organization   @relation(fields: [orgId], references: [id])
+  integrations  Integration[]
+  templates     Template[]
+  pillars       Pillar[]
+  ghlConnection GhlConnection?
 
   @@unique([orgId, name, deletedAt])
+}
+
+model GhlConnection {
+  id            String       @id @default(uuid())
+  orgId         String
+  customerId    String       @unique
+  locationId    String
+  token         String
+  accountsCache String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  organization  Organization @relation(fields: [orgId], references: [id])
+  customer      Customer     @relation(fields: [customerId], references: [id])
+
+  @@index([orgId])
+  @@index([customerId])
 }
 
 model Integration {

@@ -13,6 +13,7 @@ import { IntegrationManager } from '@gitroom/nestjs-libraries/integrations/integ
 import { SettingsController } from '@gitroom/backend/api/routes/settings.controller';
 import { PostsController } from '@gitroom/backend/api/routes/posts.controller';
 import { TemplatesController } from '@gitroom/backend/api/routes/templates.controller';
+import { GhlController } from '@gitroom/backend/api/routes/ghl.controller';
 import { CustomersController } from '@gitroom/backend/api/routes/customers.controller';
 import { MediaController } from '@gitroom/backend/api/routes/media.controller';
 import { UploadModule } from '@gitroom/nestjs-libraries/upload/upload.module';
@@ -53,6 +54,7 @@ const authenticatedController = [
   SettingsController,
   PostsController,
   TemplatesController,
+  GhlController,
   CustomersController,
   MediaController,
   BillingController,

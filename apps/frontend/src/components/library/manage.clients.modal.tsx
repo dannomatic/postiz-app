@@ -46,6 +46,44 @@ const ClientRow: FC<{
     [client]
   );
 
+  const ghlLoad = useCallback(
+    async () => (await fetch(`/ghl/connection/${client.id}`)).json(),
+    [client.id]
+  );
+  const { data: ghl, mutate: mutateGhl } = useSWR(`ghl-${client.id}`, ghlLoad, {
+    revalidateOnFocus: false,
+    revalidateOnMount: true,
+  });
+  const [ghlLocation, setGhlLocation] = useState('');
+  const [ghlToken, setGhlToken] = useState('');
+  const [ghlBusy, setGhlBusy] = useState(false);
+
+  const connectGhl = useCallback(async () => {
+    if (!ghlLocation.trim() || !ghlToken.trim()) return;
+    setGhlBusy(true);
+    const res = await fetch(`/ghl/connection/${client.id}`, {
+      method: 'POST',
+      body: JSON.stringify({
+        locationId: ghlLocation.trim(),
+        token: ghlToken.trim(),
+      }),
+    });
+    setGhlBusy(false);
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      toaster.show(d?.message || 'GoHighLevel connection failed', 'warning');
+      return;
+    }
+    setGhlToken('');
+    toaster.show('Connected to GoHighLevel', 'success');
+    mutateGhl();
+  }, [ghlLocation, ghlToken, client.id]);
+
+  const disconnectGhl = useCallback(async () => {
+    await fetch(`/ghl/connection/${client.id}`, { method: 'DELETE' });
+    mutateGhl();
+  }, [client.id]);
+
   const rename = useCallback(async () => {
     if (!name.trim() || name.trim() === client.name) return;
     await fetch('/customers', {
@@ -158,6 +196,68 @@ const ClientRow: FC<{
           );
         })}
       </div>
+
+      <div className="text-[12px] opacity-70">
+        {t('ghl', 'GoHighLevel')}
+      </div>
+      {ghl?.connected ? (
+        <div className="flex flex-col gap-[6px] text-[13px]">
+          <div>
+            {t('connected', 'Connected')} · {t('location', 'Location')}{' '}
+            {ghl.locationId}
+          </div>
+          <div className="flex flex-wrap gap-[6px]">
+            {(ghl.accounts || []).map((a: any) => (
+              <span
+                key={a.id}
+                className="text-[11px] px-[8px] py-[2px] rounded-full bg-newBgColor border border-newBorder"
+              >
+                {a.platform}
+              </span>
+            ))}
+            {(!ghl.accounts || ghl.accounts.length === 0) && (
+              <span className="opacity-60 text-[12px]">
+                {t(
+                  'no_ghl_accounts',
+                  'No social accounts connected in this GHL sub-account yet'
+                )}
+              </span>
+            )}
+          </div>
+          <div>
+            <button
+              onClick={disconnectGhl}
+              className="text-[#FF3F3F] text-[13px] font-[600]"
+            >
+              {t('disconnect', 'Disconnect')}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center gap-[8px]">
+          <input
+            className={`${inputClass} w-[200px]`}
+            placeholder={t('ghl_location_id', 'GHL Location ID')}
+            value={ghlLocation}
+            onChange={(e) => setGhlLocation(e.target.value)}
+          />
+          <input
+            type="password"
+            className={`${inputClass} w-[240px]`}
+            placeholder={t('ghl_token', 'Private Integration Token')}
+            value={ghlToken}
+            onChange={(e) => setGhlToken(e.target.value)}
+          />
+          <Button
+            onClick={connectGhl}
+            disabled={ghlBusy || !ghlLocation.trim() || !ghlToken.trim()}
+          >
+            {ghlBusy
+              ? t('connecting', 'Connecting...')
+              : t('connect', 'Connect')}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

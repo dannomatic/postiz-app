@@ -13,6 +13,7 @@ import { newDayjs } from '@gitroom/frontend/components/layout/set.timezone';
 import { useModals } from '@gitroom/frontend/components/layout/new-modal';
 import { useUser } from '@gitroom/frontend/components/layout/user.context';
 import { ManageClientsModal } from '@gitroom/frontend/components/library/manage.clients.modal';
+import { GhlScheduleModal } from '@gitroom/frontend/components/library/ghl.schedule.modal';
 import {
   NewLibraryItemModal,
   NewLibraryLaunch,
@@ -237,6 +238,19 @@ export const LibraryComponent: FC = () => {
       });
     },
     [integrations, modal, toaster, t, mutate]
+  );
+
+  const addToGhl = useCallback(
+    (template: any) => () => {
+      modal.openModal({
+        title: '',
+        withCloseButton: true,
+        closeOnEscape: true,
+        closeOnClickOutside: true,
+        children: <GhlScheduleModal template={template} />,
+      });
+    },
+    [modal]
   );
 
   const remove = useCallback(
@@ -490,6 +504,15 @@ export const LibraryComponent: FC = () => {
                   {t('delete', 'Delete')}
                 </button>
               </div>
+
+              {template.customerId && (
+                <button
+                  onClick={addToGhl(template)}
+                  className="h-[40px] rounded-[8px] border border-newBorder text-[13px] font-[600] hover:bg-newBgColor"
+                >
+                  {t('add_to_ghl_calendar', 'Add to GHL Calendar')}
+                </button>
+              )}
             </div>
           ))}
         </div>
