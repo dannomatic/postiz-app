@@ -56,6 +56,7 @@ const ClientRow: FC<{
   });
   const [ghlLocation, setGhlLocation] = useState('');
   const [ghlToken, setGhlToken] = useState('');
+  const [ghlUserId, setGhlUserId] = useState('');
   const [ghlBusy, setGhlBusy] = useState(false);
 
   const connectGhl = useCallback(async () => {
@@ -66,6 +67,7 @@ const ClientRow: FC<{
       body: JSON.stringify({
         locationId: ghlLocation.trim(),
         token: ghlToken.trim(),
+        userId: ghlUserId.trim() || undefined,
       }),
     });
     setGhlBusy(false);
@@ -75,9 +77,10 @@ const ClientRow: FC<{
       return;
     }
     setGhlToken('');
+    setGhlUserId('');
     toaster.show('Connected to GoHighLevel', 'success');
     mutateGhl();
-  }, [ghlLocation, ghlToken, client.id]);
+  }, [ghlLocation, ghlToken, ghlUserId, client.id]);
 
   const disconnectGhl = useCallback(async () => {
     await fetch(`/ghl/connection/${client.id}`, { method: 'DELETE' });
@@ -247,6 +250,12 @@ const ClientRow: FC<{
             placeholder={t('ghl_token', 'Private Integration Token')}
             value={ghlToken}
             onChange={(e) => setGhlToken(e.target.value)}
+          />
+          <input
+            className={`${inputClass} w-[180px]`}
+            placeholder={t('ghl_user_id', 'User ID (optional)')}
+            value={ghlUserId}
+            onChange={(e) => setGhlUserId(e.target.value)}
           />
           <Button
             onClick={connectGhl}

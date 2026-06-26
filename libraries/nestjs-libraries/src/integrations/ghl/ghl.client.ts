@@ -42,11 +42,40 @@ export async function ghlListAccounts(
   }));
 }
 
+export interface GhlUser {
+  id: string;
+  name?: string;
+  email?: string;
+}
+
+// GET /users/?locationId=... — used to resolve the GHL user that authors posts
+// (createPost requires a userId). Requires the token to have users.readonly.
+export async function ghlListUsers(
+  locationId: string,
+  token: string
+): Promise<GhlUser[]> {
+  const res = await fetch(
+    `${GHL_BASE}/users/?locationId=${encodeURIComponent(locationId)}`,
+    { headers: ghlHeaders(token) }
+  );
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(`GHL users ${res.status}: ${text}`);
+  }
+  const data = text ? JSON.parse(text) : {};
+  return (data?.users || []).map((u: any) => ({
+    id: u.id || u._id,
+    name: u.name,
+    email: u.email,
+  }));
+}
+
 export interface GhlCreatePostInput {
   accountIds: string[];
   summary: string;
   media?: { url: string; type?: string }[];
   scheduleDate: string; // ISO 8601
+  userId: string; // required by GHL — the authoring user
 }
 
 // POST /social-media-posting/:locationId/posts
@@ -58,9 +87,10 @@ export async function ghlCreatePost(
   const body: Record<string, any> = {
     accountIds: input.accountIds,
     summary: input.summary,
-    type: 'post',
-    status: 'scheduled',
+    type: 'post', // GHL enum: post | story | reel
+    status: 'scheduled', // GHL enum: draft | scheduled | published | ...
     scheduleDate: input.scheduleDate,
+    userId: input.userId,
   };
   if (input.media?.length) {
     body.media = input.media;

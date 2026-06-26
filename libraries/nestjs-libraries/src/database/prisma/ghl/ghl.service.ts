@@ -4,6 +4,7 @@ import { TemplatesService } from '@gitroom/nestjs-libraries/database/prisma/temp
 import {
   ghlCreatePost,
   ghlListAccounts,
+  ghlListUsers,
 } from '@gitroom/nestjs-libraries/integrations/ghl/ghl.client';
 
 // Map Postiz provider identifiers to GHL social platform names.
@@ -58,18 +59,32 @@ export class GhlService {
     orgId: string,
     customerId: string,
     locationId: string,
-    token: string
+    token: string,
+    userId?: string
   ) {
     // Validates the token + location by listing the sub-account's accounts.
     const accounts = await ghlListAccounts(locationId, token);
+
+    // createPost requires a GHL authoring user; auto-detect one if not provided.
+    let resolvedUserId = userId?.trim() || null;
+    if (!resolvedUserId) {
+      try {
+        const users = await ghlListUsers(locationId, token);
+        resolvedUserId = users[0]?.id || null;
+      } catch {
+        resolvedUserId = null; // token may lack users.readonly; user can set it manually
+      }
+    }
+
     await this._ghlRepository.upsert(
       orgId,
       customerId,
       locationId,
       token,
+      resolvedUserId,
       JSON.stringify(accounts)
     );
-    return { connected: true, accounts };
+    return { connected: true, accounts, userId: resolvedUserId };
   }
 
   removeConnection(orgId: string, customerId: string) {
@@ -95,6 +110,12 @@ export class GhlService {
     if (!conn) {
       throw new HttpException(
         'This client is not connected to GoHighLevel.',
+        400
+      );
+    }
+    if (!conn.userId) {
+      throw new HttpException(
+        'No GoHighLevel authoring user is set for this client. Reconnect with a token that has the users.readonly scope, or provide a User ID.',
         400
       );
     }
@@ -151,6 +172,7 @@ export class GhlService {
           summary,
           media,
           scheduleDate,
+          userId: conn.userId,
         });
         scheduled.push(label);
       } catch (e: any) {

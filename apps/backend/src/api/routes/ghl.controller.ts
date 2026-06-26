@@ -55,7 +55,8 @@ export class GhlController {
       org.id,
       customerId,
       body.locationId,
-      body.token
+      body.token,
+      body.userId
     );
   }
 

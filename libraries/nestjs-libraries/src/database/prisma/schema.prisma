@@ -382,6 +382,7 @@ model GhlConnection {
   customerId    String       @unique
   locationId    String
   token         String
+  userId        String?
   accountsCache String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt

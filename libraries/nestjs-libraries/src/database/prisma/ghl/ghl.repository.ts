@@ -19,6 +19,7 @@ export class GhlRepository {
     customerId: string,
     locationId: string,
     token: string,
+    userId: string | null,
     accountsCache: string
   ) {
     const existing = await this._ghl.model.ghlConnection.findFirst({
@@ -27,12 +28,19 @@ export class GhlRepository {
     if (existing) {
       await this._ghl.model.ghlConnection.update({
         where: { id: existing.id },
-        data: { orgId, locationId, token, accountsCache, deletedAt: null },
+        data: {
+          orgId,
+          locationId,
+          token,
+          userId,
+          accountsCache,
+          deletedAt: null,
+        },
       });
       return { id: existing.id };
     }
     const { id } = await this._ghl.model.ghlConnection.create({
-      data: { orgId, customerId, locationId, token, accountsCache },
+      data: { orgId, customerId, locationId, token, userId, accountsCache },
     });
     return { id };
   }
