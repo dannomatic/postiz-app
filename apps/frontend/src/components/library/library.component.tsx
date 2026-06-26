@@ -32,7 +32,7 @@ export const LibraryComponent: FC = () => {
     ['ADMIN', 'SUPERADMIN'].includes((user as any)?.role);
 
   const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('');
+  const [pillar, setPillar] = useState('');
   const [postType, setPostType] = useState('');
   const [customer, setCustomer] = useState('');
   const [tag, setTag] = useState('');
@@ -65,10 +65,13 @@ export const LibraryComponent: FC = () => {
     fallbackData: [],
   });
 
-  const categories = useMemo(
-    () => distinct(templates.map((p: any) => p.category)),
-    [templates]
-  );
+  const pillars = useMemo(() => {
+    const map = new Map<string, string>();
+    templates.forEach((p: any) => {
+      if (p.pillar?.id) map.set(p.pillar.id, p.pillar.name || p.pillar.id);
+    });
+    return Array.from(map, ([id, label]) => ({ id, label }));
+  }, [templates]);
   const postTypes = useMemo(
     () => distinct(templates.map((p: any) => p.postType)),
     [templates]
@@ -94,7 +97,7 @@ export const LibraryComponent: FC = () => {
     return templates.filter((p: any) => {
       if (search && !p.name?.toLowerCase().includes(search.toLowerCase()))
         return false;
-      if (category && p.category !== category) return false;
+      if (pillar && p.pillar?.id !== pillar) return false;
       if (postType && p.postType !== postType) return false;
       if (customer && p.customer?.id !== customer) return false;
       if (
@@ -104,7 +107,7 @@ export const LibraryComponent: FC = () => {
         return false;
       return true;
     });
-  }, [templates, search, category, postType, customer, tag]);
+  }, [templates, search, pillar, postType, customer, tag]);
 
   const channelCount = (template: any) =>
     (template.payload?.posts || []).length;
@@ -209,7 +212,7 @@ export const LibraryComponent: FC = () => {
             reopenModal={() => {}}
             libraryDefaults={{
               name: p.name,
-              category: p.category,
+              pillarId: p.pillarId,
               postType: p.postType,
               customerId: p.customerId,
               tags: p.tags,
@@ -295,13 +298,13 @@ export const LibraryComponent: FC = () => {
         </select>
         <select
           className={selectClass}
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
+          value={pillar}
+          onChange={(e) => setPillar(e.target.value)}
         >
-          <option value="">{t('all_categories', 'All categories')}</option>
-          {categories.map((c) => (
-            <option key={c} value={c}>
-              {c}
+          <option value="">{t('all_pillars', 'All pillars')}</option>
+          {pillars.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.label}
             </option>
           ))}
         </select>
@@ -361,9 +364,9 @@ export const LibraryComponent: FC = () => {
                     {template.customer.name}
                   </span>
                 )}
-                {template.category && (
-                  <span className="text-[11px] px-[8px] py-[2px] rounded-full bg-newBgColor border border-newBorder">
-                    {template.category}
+                {template.pillar?.name && (
+                  <span className="text-[11px] px-[8px] py-[2px] rounded-full bg-[#2a2f45] border border-newBorder">
+                    {template.pillar.name}
                   </span>
                 )}
                 {template.postType && (

@@ -35,7 +35,7 @@ export interface AddEditModalProps {
   // New Library Item flow (client/category/tags chosen up front).
   libraryDefaults?: {
     name?: string;
-    category?: string;
+    pillarId?: string;
     postType?: string;
     customerId?: string;
     tags?: { value: string; label: string }[];

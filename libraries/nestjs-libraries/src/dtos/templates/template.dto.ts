@@ -33,6 +33,10 @@ export class TemplateDto {
 
   @IsOptional()
   @IsString()
+  pillarId?: string;
+
+  @IsOptional()
+  @IsString()
   category?: string;
 
   @IsOptional()

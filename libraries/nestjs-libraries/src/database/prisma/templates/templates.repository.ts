@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export interface TemplateFilters {
   customerId?: string;
+  pillarId?: string;
   category?: string;
   postType?: string;
   tagId?: string;
@@ -18,18 +19,20 @@ export class TemplatesRepository {
   ) {}
 
   getTemplates(orgId: string, filters: TemplateFilters = {}) {
-    const { customerId, category, postType, tagId } = filters;
+    const { customerId, pillarId, category, postType, tagId } = filters;
     return this._templates.model.template.findMany({
       where: {
         orgId,
         deletedAt: null,
         ...(customerId ? { customerId } : {}),
+        ...(pillarId ? { pillarId } : {}),
         ...(category ? { category } : {}),
         ...(postType ? { postType } : {}),
         ...(tagId ? { tags: { some: { tagId } } } : {}),
       },
       include: {
         customer: true,
+        pillar: { select: { id: true, name: true } },
         tags: { include: { tag: true } },
       },
       orderBy: {
@@ -47,6 +50,7 @@ export class TemplatesRepository {
       },
       include: {
         customer: true,
+        pillar: { select: { id: true, name: true } },
         tags: { include: { tag: true } },
       },
     });
@@ -83,6 +87,7 @@ export class TemplatesRepository {
         category: body.category || null,
         postType: body.postType || null,
         customerId: body.customerId || null,
+        pillarId: body.pillarId || null,
         payload,
       },
       update: {
@@ -90,6 +95,7 @@ export class TemplatesRepository {
         category: body.category || null,
         postType: body.postType || null,
         customerId: body.customerId || null,
+        pillarId: body.pillarId || null,
         payload,
       },
     });

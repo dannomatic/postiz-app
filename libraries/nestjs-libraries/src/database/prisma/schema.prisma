@@ -38,6 +38,7 @@ model Organization {
   subscription        Subscription?
   tags                Tags[]
   templates           Template[]
+  pillars             Pillar[]
   thirdParty          ThirdParty[]
   usedCodes           UsedCodes[]
   users               UserOrganization[]
@@ -86,17 +87,37 @@ model Template {
   category     String?
   postType     String?
   payload      String
+  pillarId     String?
   deletedAt    DateTime?
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   organization Organization   @relation(fields: [orgId], references: [id])
   customer     Customer?      @relation(fields: [customerId], references: [id])
+  pillar       Pillar?        @relation(fields: [pillarId], references: [id])
   tags         TemplateTags[]
 
   @@index([orgId])
   @@index([customerId])
+  @@index([pillarId])
   @@index([category])
   @@index([postType])
+  @@index([deletedAt])
+}
+
+model Pillar {
+  id           String       @id @default(uuid())
+  orgId        String
+  customerId   String
+  name         String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  deletedAt    DateTime?
+  organization Organization @relation(fields: [orgId], references: [id])
+  customer     Customer     @relation(fields: [customerId], references: [id])
+  templates    Template[]
+
+  @@index([orgId])
+  @@index([customerId])
   @@index([deletedAt])
 }
 
@@ -344,6 +365,7 @@ model Customer {
   organization Organization  @relation(fields: [orgId], references: [id])
   integrations Integration[]
   templates    Template[]
+  pillars      Pillar[]
 
   @@unique([orgId, name, deletedAt])
 }

@@ -16,6 +16,7 @@ import { CustomersService } from '@gitroom/nestjs-libraries/database/prisma/cust
 import {
   AssignChannelsDto,
   CustomerDto,
+  PillarDto,
   UpdateCustomerDto,
 } from '@gitroom/nestjs-libraries/dtos/customers/customer.dto';
 
@@ -51,7 +52,29 @@ export class CustomersController {
     @Body() body: CustomerDto
   ) {
     this.assertAdmin(org, user);
-    return this._customersService.create(org.id, body.name);
+    return this._customersService.create(org.id, body.name, body.pillars);
+  }
+
+  @Post('/:id/pillars')
+  addPillar(
+    @GetOrgFromRequest() org: Organization,
+    @GetUserFromRequest() user: User,
+    @Param('id') id: string,
+    @Body() body: PillarDto
+  ) {
+    this.assertAdmin(org, user);
+    return this._customersService.addPillar(org.id, id, body.name);
+  }
+
+  @Delete('/:id/pillars/:pillarId')
+  removePillar(
+    @GetOrgFromRequest() org: Organization,
+    @GetUserFromRequest() user: User,
+    @Param('id') id: string,
+    @Param('pillarId') pillarId: string
+  ) {
+    this.assertAdmin(org, user);
+    return this._customersService.removePillar(org.id, id, pillarId);
   }
 
   @Put('/')

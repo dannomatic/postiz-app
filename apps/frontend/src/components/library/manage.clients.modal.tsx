@@ -21,8 +21,30 @@ const ClientRow: FC<{
   const toaster = useToaster();
   const t = useT();
   const [name, setName] = useState(client.name);
+  const [pillarDraft, setPillarDraft] = useState('');
 
   const assigned = new Set((client.integrations || []).map((i: any) => i.id));
+  const pillars = client.pillars || [];
+
+  const addPillar = useCallback(async () => {
+    if (!pillarDraft.trim()) return;
+    await fetch(`/customers/${client.id}/pillars`, {
+      method: 'POST',
+      body: JSON.stringify({ name: pillarDraft.trim() }),
+    });
+    setPillarDraft('');
+    onChanged();
+  }, [pillarDraft, client]);
+
+  const removePillar = useCallback(
+    (pillarId: string) => async () => {
+      await fetch(`/customers/${client.id}/pillars/${pillarId}`, {
+        method: 'DELETE',
+      });
+      onChanged();
+    },
+    [client]
+  );
 
   const rename = useCallback(async () => {
     if (!name.trim() || name.trim() === client.name) return;
@@ -79,6 +101,32 @@ const ClientRow: FC<{
           {t('delete', 'Delete')}
         </button>
       </div>
+      <div className="text-[12px] opacity-70">{t('pillars', 'Pillars')}</div>
+      <div className="flex flex-wrap items-center gap-[8px]">
+        {pillars.map((p: any) => (
+          <span
+            key={p.id}
+            className="flex items-center gap-[6px] px-[10px] h-[30px] rounded-full bg-newBgColor border border-newBorder text-[12px]"
+          >
+            {p.name}
+            <button
+              onClick={removePillar(p.id)}
+              className="text-[#FF3F3F] leading-none"
+              title={t('remove', 'Remove')}
+            >
+              ×
+            </button>
+          </span>
+        ))}
+        <input
+          className={`${inputClass} w-[160px]`}
+          placeholder={t('add_pillar', 'Add pillar')}
+          value={pillarDraft}
+          onChange={(e) => setPillarDraft(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && addPillar()}
+        />
+      </div>
+
       <div className="text-[12px] opacity-70">
         {t('assign_channels', 'Assigned channels')}
       </div>
@@ -119,6 +167,8 @@ export const ManageClientsModal: FC = () => {
   const toaster = useToaster();
   const t = useT();
   const [newName, setNewName] = useState('');
+  const [newPillars, setNewPillars] = useState<string[]>([]);
+  const [pillarDraft, setPillarDraft] = useState('');
 
   const loadClients = useCallback(
     async () => (await fetch('/customers')).json(),
@@ -146,16 +196,25 @@ export const ManageClientsModal: FC = () => {
     }
   );
 
+  const addPillarDraft = useCallback(() => {
+    const v = pillarDraft.trim();
+    if (!v || newPillars.includes(v)) return;
+    setNewPillars((p) => [...p, v]);
+    setPillarDraft('');
+  }, [pillarDraft, newPillars]);
+
   const addClient = useCallback(async () => {
-    if (!newName.trim()) return;
+    if (!newName.trim() || newPillars.length === 0) return;
     await fetch('/customers', {
       method: 'POST',
-      body: JSON.stringify({ name: newName.trim() }),
+      body: JSON.stringify({ name: newName.trim(), pillars: newPillars }),
     });
     setNewName('');
+    setNewPillars([]);
+    setPillarDraft('');
     toaster.show(t('client_created', 'Client created'), 'success');
     mutate();
-  }, [newName]);
+  }, [newName, newPillars]);
 
   return (
     <div className="flex flex-col gap-[16px] p-[20px] min-w-[560px] max-w-[680px] text-textColor">
@@ -163,17 +222,49 @@ export const ManageClientsModal: FC = () => {
         {t('manage_clients', 'Manage Clients')}
       </div>
 
-      <div className="flex gap-[8px]">
+      <div className="bg-newBgColorInner border border-newBorder rounded-[12px] p-[14px] flex flex-col gap-[10px]">
         <input
-          className={`${inputClass} flex-1`}
+          className={inputClass}
           placeholder={t('new_client_name', 'New client name')}
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && addClient()}
         />
-        <Button onClick={addClient} disabled={!newName.trim()}>
-          {t('add_client', 'Add client')}
-        </Button>
+        <div className="text-[12px] opacity-70">
+          {t('pillars_required_hint', 'Add at least one pillar (content theme)')}
+        </div>
+        <div className="flex flex-wrap items-center gap-[8px]">
+          {newPillars.map((p) => (
+            <span
+              key={p}
+              className="flex items-center gap-[6px] px-[10px] h-[30px] rounded-full bg-newBgColor border border-newBorder text-[12px]"
+            >
+              {p}
+              <button
+                onClick={() =>
+                  setNewPillars((arr) => arr.filter((x) => x !== p))
+                }
+                className="text-[#FF3F3F] leading-none"
+              >
+                ×
+              </button>
+            </span>
+          ))}
+          <input
+            className={`${inputClass} w-[180px]`}
+            placeholder={t('add_pillar', 'Add pillar')}
+            value={pillarDraft}
+            onChange={(e) => setPillarDraft(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addPillarDraft()}
+          />
+        </div>
+        <div className="flex justify-end">
+          <Button
+            onClick={addClient}
+            disabled={!newName.trim() || newPillars.length === 0}
+          >
+            {t('add_client', 'Add client')}
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-[12px] max-h-[420px] overflow-y-auto">

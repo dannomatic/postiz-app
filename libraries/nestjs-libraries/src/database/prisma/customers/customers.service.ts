@@ -9,8 +9,16 @@ export class CustomersService {
     return this._customersRepository.list(orgId);
   }
 
-  create(orgId: string, name: string) {
-    return this._customersRepository.create(orgId, name);
+  create(orgId: string, name: string, pillars: string[]) {
+    return this._customersRepository.create(orgId, name, pillars);
+  }
+
+  addPillar(orgId: string, customerId: string, name: string) {
+    return this._customersRepository.addPillar(orgId, customerId, name);
+  }
+
+  removePillar(orgId: string, customerId: string, pillarId: string) {
+    return this._customersRepository.removePillar(orgId, customerId, pillarId);
   }
 
   rename(orgId: string, id: string, name: string) {

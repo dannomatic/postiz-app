@@ -14,7 +14,7 @@ export interface NewLibraryLaunch {
   customerId: string;
   channelIds: string[];
   name: string;
-  category: string;
+  pillarId: string;
   postType: string;
   tags: { value: string; label: string }[];
 }
@@ -29,7 +29,7 @@ export const NewLibraryItemModal: FC<{
   const [customerId, setCustomerId] = useState('');
   const [channelIds, setChannelIds] = useState<string[]>([]);
   const [name, setName] = useState('');
-  const [category, setCategory] = useState('');
+  const [pillarId, setPillarId] = useState('');
   const [postType, setPostType] = useState('');
   const [tagIds, setTagIds] = useState<string[]>([]);
 
@@ -61,6 +61,7 @@ export const NewLibraryItemModal: FC<{
     [clients, customerId]
   );
   const clientChannels = selectedClient?.integrations || [];
+  const clientPillars = selectedClient?.pillars || [];
 
   const toggle = (arr: string[], id: string) =>
     arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id];
@@ -70,13 +71,13 @@ export const NewLibraryItemModal: FC<{
       customerId,
       channelIds,
       name: name.trim(),
-      category: category.trim(),
+      pillarId,
       postType: postType.trim(),
       tags: tags
         .filter((tg: any) => tagIds.includes(tg.id))
         .map((tg: any) => ({ value: tg.id, label: tg.name })),
     });
-  }, [customerId, channelIds, name, category, postType, tagIds, tags]);
+  }, [customerId, channelIds, name, pillarId, postType, tagIds, tags]);
 
   const canNext =
     (step === 1 && !!customerId) ||
@@ -182,14 +183,20 @@ export const NewLibraryItemModal: FC<{
           <div className="flex gap-[12px]">
             <div className="flex flex-1 flex-col gap-[6px]">
               <label className="text-[14px] font-[500]">
-                {t('category', 'Category')}
+                {t('pillar', 'Pillar')}
               </label>
-              <input
+              <select
                 className={inputClass}
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                placeholder={t('category_placeholder', 'e.g. Promotion')}
-              />
+                value={pillarId}
+                onChange={(e) => setPillarId(e.target.value)}
+              >
+                <option value="">{t('select_pillar', 'Select a pillar')}</option>
+                {clientPillars.map((p: any) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="flex flex-1 flex-col gap-[6px]">
               <label className="text-[14px] font-[500]">
@@ -242,7 +249,7 @@ export const NewLibraryItemModal: FC<{
             {t('next', 'Next')}
           </Button>
         ) : (
-          <Button onClick={launch} disabled={!name.trim()}>
+          <Button onClick={launch} disabled={!name.trim() || !pillarId}>
             {t('open_composer', 'Open composer')}
           </Button>
         )}

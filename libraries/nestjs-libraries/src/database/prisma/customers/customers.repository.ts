@@ -5,7 +5,8 @@ import { Injectable } from '@nestjs/common';
 export class CustomersRepository {
   constructor(
     private _customer: PrismaRepository<'customer'>,
-    private _integration: PrismaRepository<'integration'>
+    private _integration: PrismaRepository<'integration'>,
+    private _pillar: PrismaRepository<'pillar'>
   ) {}
 
   list(orgId: string) {
@@ -24,11 +25,31 @@ export class CustomersRepository {
             picture: true,
           },
         },
+        pillars: {
+          where: { deletedAt: null },
+          select: { id: true, name: true },
+          orderBy: { name: 'asc' },
+        },
       },
       orderBy: {
         name: 'asc',
       },
     });
+  }
+
+  async addPillar(orgId: string, customerId: string, name: string) {
+    const { id } = await this._pillar.model.pillar.create({
+      data: { orgId, customerId, name },
+    });
+    return { id };
+  }
+
+  async removePillar(orgId: string, customerId: string, pillarId: string) {
+    await this._pillar.model.pillar.updateMany({
+      where: { id: pillarId, customerId, orgId },
+      data: { deletedAt: new Date() },
+    });
+    return { id: pillarId };
   }
 
   getById(orgId: string, id: string) {
@@ -37,17 +58,30 @@ export class CustomersRepository {
     });
   }
 
-  async create(orgId: string, name: string) {
+  async create(orgId: string, name: string, pillars: string[]) {
+    const cleanPillars = Array.from(
+      new Set((pillars || []).map((p) => p.trim()).filter(Boolean))
+    );
+
     const existing = await this._customer.model.customer.findFirst({
       where: { orgId, name, deletedAt: null },
     });
-    if (existing) {
-      return { id: existing.id };
+
+    const customerId =
+      existing?.id ||
+      (
+        await this._customer.model.customer.create({
+          data: { name, orgId },
+        })
+      ).id;
+
+    if (cleanPillars.length) {
+      await this._pillar.model.pillar.createMany({
+        data: cleanPillars.map((p) => ({ orgId, customerId, name: p })),
+      });
     }
-    const { id } = await this._customer.model.customer.create({
-      data: { name, orgId },
-    });
-    return { id };
+
+    return { id: customerId };
   }
 
   async rename(orgId: string, id: string, name: string) {
