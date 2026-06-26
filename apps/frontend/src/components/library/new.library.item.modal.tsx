@@ -44,10 +44,11 @@ export const NewLibraryItemModal: FC<{
     fallbackData: [],
   });
 
-  const loadTags = useCallback(
-    async () => (await fetch('/posts/tags')).json(),
-    []
-  );
+  const loadTags = useCallback(async () => {
+    // /posts/tags returns { tags: [...] }, not a bare array.
+    const res = await (await fetch('/posts/tags')).json();
+    return res?.tags || [];
+  }, []);
   const { data: tags = [] } = useSWR('/posts/tags', loadTags, {
     revalidateOnFocus: false,
     revalidateIfStale: false,
