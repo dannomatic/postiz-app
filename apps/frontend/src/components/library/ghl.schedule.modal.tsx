@@ -101,22 +101,36 @@ export const GhlScheduleModal: FC<{ template: any }> = ({ template }) => {
           </div>
         </>
       ) : (
-        <div className="flex flex-col gap-[10px] text-[14px]">
+        <div className="flex flex-col gap-[12px] text-[14px]">
           {result.scheduled?.length > 0 && (
             <div>
-              ✅ {t('scheduled', 'Scheduled')}: {result.scheduled.join(', ')}
+              <div className="font-[600] mb-[4px]">
+                ✅ {t('scheduled', 'Scheduled')}
+              </div>
+              <ul className="list-disc ps-[18px] opacity-90">
+                {result.scheduled.map((s: string, i: number) => (
+                  <li key={i}>{s}</li>
+                ))}
+              </ul>
             </div>
           )}
           {result.skipped?.length > 0 && (
-            <div className="opacity-70">
-              ⚠️ {t('skipped', 'Skipped')}: {result.skipped.join(', ')}
+            <div>
+              <div className="font-[600] mb-[4px]">
+                ⚠️ {t('skipped', 'Skipped')}
+              </div>
+              <ul className="list-disc ps-[18px] opacity-70">
+                {result.skipped.map((s: string, i: number) => (
+                  <li key={i}>{s}</li>
+                ))}
+              </ul>
             </div>
           )}
           {!result.scheduled?.length && (
             <div className="opacity-70">
               {t(
                 'ghl_nothing_scheduled',
-                'Nothing was scheduled — no Postiz channels matched a connected GHL account.'
+                'Nothing was sent — no channels were connected in this client’s GoHighLevel sub-account. Connect them in GHL, then try again.'
               )}
             </div>
           )}

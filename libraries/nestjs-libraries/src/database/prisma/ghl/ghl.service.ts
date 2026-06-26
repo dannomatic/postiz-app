@@ -159,15 +159,21 @@ export class GhlService {
 
     for (const p of posts) {
       const provider = integMap.get(p.integration?.id);
-      const ghlPlatform = toGhlPlatform(provider);
-      const match = ghlPlatform
-        ? accounts.find((a) => a.platform === ghlPlatform)
-        : undefined;
-
       const label = provider || p.integration?.id || 'unknown';
+      const ghlPlatform = toGhlPlatform(provider);
+
+      if (!ghlPlatform) {
+        // Postiz channel on a platform GoHighLevel doesn't support at all.
+        skipped.push(`${label} — not supported by GoHighLevel`);
+        continue;
+      }
+
+      const match = accounts.find((a) => a.platform === ghlPlatform);
       if (!match) {
-        // Postiz channel has no matching connected account on the GHL side.
-        skipped.push(label);
+        // Platform is supported, but not connected in this client's GHL sub-account.
+        skipped.push(
+          `${label} — not connected in this client's GoHighLevel sub-account`
+        );
         continue;
       }
 
@@ -188,7 +194,7 @@ export class GhlService {
         });
         scheduled.push(label);
       } catch (e: any) {
-        skipped.push(`${label} (error: ${e?.message || 'failed'})`);
+        skipped.push(`${label} — error: ${e?.message || 'failed'}`);
       }
     }
 
