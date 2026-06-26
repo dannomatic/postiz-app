@@ -157,6 +157,28 @@ export const useMenuItem = () => {
       path: '/plugs',
     },
     {
+      name: t('clients', 'Clients'),
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <path
+            d="M16 19c0-2.21-2.69-4-6-4s-6 1.79-6 4M10 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7Zm10 8c0-1.74-1.34-3.18-3.2-3.74M15.5 4.24A3.5 3.5 0 0116 11"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ),
+      path: '/clients',
+      role: ['ADMIN', 'SUPERADMIN'],
+    },
+    {
       name: t('integrations', 'Integrations'),
       icon: (
         <svg

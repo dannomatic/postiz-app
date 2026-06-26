@@ -162,7 +162,7 @@ const ClientRow: FC<{
   );
 };
 
-export const ManageClientsModal: FC = () => {
+export const ManageClientsModal: FC<{ page?: boolean }> = ({ page }) => {
   const fetch = useFetch();
   const toaster = useToaster();
   const t = useT();
@@ -217,7 +217,11 @@ export const ManageClientsModal: FC = () => {
   }, [newName, newPillars]);
 
   return (
-    <div className="flex flex-col gap-[16px] p-[20px] min-w-[560px] max-w-[680px] text-textColor">
+    <div
+      className={`flex flex-col gap-[16px] p-[20px] text-textColor ${
+        page ? 'w-full' : 'min-w-[560px] max-w-[680px]'
+      }`}
+    >
       <div className="text-[20px] font-[600]">
         {t('manage_clients', 'Manage Clients')}
       </div>
@@ -267,7 +271,11 @@ export const ManageClientsModal: FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-col gap-[12px] max-h-[420px] overflow-y-auto">
+      <div
+        className={`flex flex-col gap-[12px] overflow-y-auto ${
+          page ? '' : 'max-h-[420px]'
+        }`}
+      >
         {clients.length === 0 ? (
           <div className="opacity-70 text-[14px]">
             {t('no_clients_yet', 'No clients yet. Add one above.')}

@@ -456,11 +456,12 @@ export const LibraryComponent: FC = () => {
                   t('no_preview', 'No text preview')}
               </div>
 
-              <div className="text-[11px] opacity-60 leading-[1.5] mt-auto">
-                <div>
+              <div className="text-[11px] opacity-60 mt-auto flex flex-wrap items-center gap-x-[8px] gap-y-[2px]">
+                <span>
                   {t('created', 'Created')} {fmt(template.createdAt)}
-                </div>
-                <div>
+                </span>
+                <span className="opacity-40">|</span>
+                <span>
                   {t('last_updated', 'Last Updated')} {fmt(template.updatedAt)}
                   {template.updatedBy && (
                     <>
@@ -469,7 +470,7 @@ export const LibraryComponent: FC = () => {
                       {template.updatedBy.name || template.updatedBy.email}
                     </>
                   )}
-                </div>
+                </span>
               </div>
 
               <div className="flex gap-[8px]">
