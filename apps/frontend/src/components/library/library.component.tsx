@@ -89,8 +89,12 @@ export const LibraryComponent: FC = () => {
     revalidateOnMount: true,
     fallbackData: [],
   });
-  const customers = useMemo(
-    () => allCustomers.map((c: any) => ({ id: c.id, label: c.name })),
+  const customers = useMemo<{ id: string; label: string }[]>(
+    () =>
+      (allCustomers as any[]).map((c: any) => ({
+        id: c.id,
+        label: c.name,
+      })),
     [allCustomers]
   );
   const allTags = useMemo(
