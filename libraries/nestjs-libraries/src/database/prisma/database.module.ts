@@ -13,6 +13,8 @@ import { PostsService } from '@gitroom/nestjs-libraries/database/prisma/posts/po
 import { PostsRepository } from '@gitroom/nestjs-libraries/database/prisma/posts/posts.repository';
 import { TemplatesService } from '@gitroom/nestjs-libraries/database/prisma/templates/templates.service';
 import { TemplatesRepository } from '@gitroom/nestjs-libraries/database/prisma/templates/templates.repository';
+import { CustomersService } from '@gitroom/nestjs-libraries/database/prisma/customers/customers.service';
+import { CustomersRepository } from '@gitroom/nestjs-libraries/database/prisma/customers/customers.repository';
 import { IntegrationManager } from '@gitroom/nestjs-libraries/integrations/integration.manager';
 import { MediaService } from '@gitroom/nestjs-libraries/database/prisma/media/media.service';
 import { MediaRepository } from '@gitroom/nestjs-libraries/database/prisma/media/media.repository';
@@ -71,6 +73,8 @@ import { AdminStatsService } from '@gitroom/nestjs-libraries/database/prisma/adm
     PostsRepository,
     TemplatesService,
     TemplatesRepository,
+    CustomersService,
+    CustomersRepository,
     StripeService,
     SignatureRepository,
     AutopostRepository,
